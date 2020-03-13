@@ -4,9 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+
+    <script>
+        let weatherApi = "api.openweathermap.org/data/2.5/weather?q=";
+        let weatherApi2 = "&aipid=e2b34d106b90f85d3dab6574878f67db&units=imperial";
+        let state = "unchanged";
+        let city = "unchanged";
+
+        let temp = 0;
+        let desc = "unchanged";
+        let windSpeed = 0;
+        let windDirection = "unchanged";
+
+        function showCitys(){
+            document.getElementById("cities").style.visibility = "visible";
+            document.getElementById("city").style.visibility = "visible";
+        }
+
+        function showButton(){
+            document.getElementById("button").style.visibility = "visible";
+        }
+
+        function getWeather(){
+            console.log(" state",state,"\n","city",city)
+            console.log(" temp",temp,"\n","desc",desc,"\n","windSpeed",windSpeed,"\n","windDirection",windDirection)
+        }
+
+    </script>
+
 </head>
 <body>
-    <h1>got node working</h1>
+    <h1>Weather website</h1>
+
+    <label for="states">Pick a state:</label>
+    <select id="state"; onchange="showCitys()">
+        <option value="London">London</option>
+        <option value="New%20York">New York</option>
+    </select>
+    <p></p>
+    <label for="cities"; id="cities"; style="visibility: hidden;">Pick a city:</label>
+    <select id="city"; style="visibility: hidden;" onchange="showButton()">
+        <option value="temp">temp</option>
+        <option value="temp2">temp2</option>
+    </select>
+
+    <p></p>
+
+    <button onclick="getWeather()"; id="button"; style="visibility: hidden;">Get Weather</button>
     
 </body>
 </html>
