@@ -6,29 +6,90 @@
     <title>Document</title>
 
     <script>
-        let weatherApi = "api.openweathermap.org/data/2.5/weather?q=";
-        let weatherApi2 = "&aipid=e2b34d106b90f85d3dab6574878f67db&units=imperial";
+        let weatherApi = "api.openweathermap.org/data/2.5/weather?";
+        let weatherApi2 = "&appid=e2b34d106b90f85d3dab6574878f67db&units=imperial";
         let state = "unchanged";
         let city = "unchanged";
 
-        let temp = 0;
+        let latitude = 0;
+        let longitude = 0;
+
+        let temp = "unchanged";
         let desc = "unchanged";
-        let windSpeed = 0;
+        let windSpeed = "unchanged";
         let windDirection = "unchanged";
 
         function showCitys(){
+            //shows the city dropdown
             document.getElementById("cities").style.visibility = "visible";
             document.getElementById("city").style.visibility = "visible";
         }
 
         function showButton(){
+            //shows the getWeather button
             document.getElementById("button").style.visibility = "visible";
         }
 
-        function getWeather(){
-            console.log(" state",state,"\n","city",city)
-            console.log(" temp",temp,"\n","desc",desc,"\n","windSpeed",windSpeed,"\n","windDirection",windDirection)
-            
+        function getWeather(lat, long){
+            //will send up the api call
+            console.log(lat,long);
+            //console.log(" state",state,"\n","city",city);
+            //console.log(" temp",temp,"\n","desc",desc,"\n","windSpeed",windSpeed,"\n","windDirection",windDirection);
+
+            fetch("https://cors-anywhere.herokuapp.com/https://"+weatherApi+"lat="+lat+"&lon="+long+weatherApi2)
+                .then(function(resp){
+                    return resp.json();
+                })
+                .then(function(data){
+                    temp = "the tempature is: "+data.main.temp+" degrees fahrenheit";
+                    desc = "the description is: "+data.weather[0].description;
+                    windSpeed = "the wind speed is: "+data.wind.speed+" miles per hour";
+                    windDirection = "the wind direction is: "+data.wind.deg+" degrees";
+                    //console.log("temp: "+temp+"\ndescription: "+desc+"\nwindspeed: "+windSpeed+"\nwindDirection:"+windDirection);
+                    document.getElementById("one").innerHTML = temp;
+                    document.getElementById("two").innerHTML = desc;
+                    document.getElementById("three").innerHTML = windSpeed;
+                    document.getElementById("four").innerHTML = windDirection;
+                    return(data);
+                });     
+        }
+
+        function stateJsonFileName(){
+            //takes the state picked and uses fetch to populate the city dropdown
+            //from the json file in the citys directory
+
+            fetch("./cities/"+document.getElementById("state").value+".json")
+                .then(function(resp){
+                    return resp.json();
+                })
+                .then(function(data){
+                    for(var i=0;i<data.length;i++){
+                        var opt = data[i].city;
+                        var element = document.createElement("option");
+                        element.textContent = opt;
+                        selectCities.appendChild(element);
+                    }
+                    return(data);
+                });
+        }
+
+        function getLatAndLong(){
+            //gets that lat and long of the city picked
+            fetch("./cities/"+document.getElementById("state").value+".json")
+            .then(function(resp){
+                return resp.json();
+            })
+            .then(function(data){
+                for(var i=0; i<data.length;i++){
+                    if(document.getElementById("city").value==data[i].city){
+                        latitude = data[i].lat;
+                        longitude = data[i].long;
+                    }
+                }
+                getWeather(latitude,longitude);
+
+                return(data);
+            });
         }
 
     </script>
@@ -38,13 +99,21 @@
     <h1>Weather website</h1>
 
     <label for="states">Pick a state:</label>
-
-    <select id="state"; onchange="showCitys()">
+    <select id="state"; onchange="showCitys(),stateJsonFileName()">
+        <option></option>
+    </select>
+    <p></p>
+    <label for="cities"; id="cities"; style="visibility: hidden;">Pick a city:</label>
+    <select id="city"; style="visibility: hidden;" onchange="showButton()">
         <option></option>
     </select>
 
         <script>
-            var select = document.getElementById("state");
+
+            var selectState = document.getElementById("state");
+            var selectCities = document.getElementById("city");
+
+            //all the states to pick from in the first dropdown
             var options = [{state:"Alabama",code:"AL"},{state:"Alaska",code:"AK"},{state:"Arizona",code:"AZ"},{state:"Arkansas",code:"AR"},{state:"California",code:"CA"},{state:"Colorado",code:"CO"},
             {state:"Connecticut",code:"CT"},{state:"Delaware",code:"DE"},{state:"Florida",code:"FL"},{state:"Georgia",code:"GA"},{state:"Hawaii",code:"HI"},{state:"Idaho",code:"ID"},{state:"Illinois",code:"IL"},
                 {state:"Indinana",code:"IN"},{state:"Iowa",code:"IA"},{state:"Kansas",code:"KS"},{state:"Kentucky",code:"KY"},{state:"Louisiana",code:"LA"},{state:"Main",code:"ME"},{state:"Maryland",code:"MD"},
@@ -53,35 +122,25 @@
                 {state:"North Carolina",code:"NC"},{state:"North Dakota",code:"ND"},{state:"Ohio",code:"OH"},{state:"Oklahoma",code:"OK"},{state:"Oregon",code:"OR"},{state:"Pennsylvania",code:"PA"},
                 {state:"Rhode Island",code:"RI"},{state:"south Carolina",code:"SC"},{state:"South Dakota",code:"SD"},{state:"Tennessee",code:"TN"},{state:"Texas",code:"TX"},{state:"Utah",code:"UT"},
                 {state:"Vermont",code:"VT"},{state:"Virginia",code:"VA"},{state:"Washington",code:"WA"},{state:"West Virginia",code:"WV"},{state:"Wisconsin",code:"WI"},{state:"Wyoming",code:"WY"}];
+
+            //filling up all the options for the first dropdown menu
             for(var i = 0; i < options.length; i++) {
                 var opt = options[i];
                 var element = document.createElement("option");
                 element.textContent = opt.state;
                 element.value = opt.code;
-                select.appendChild(element);
+                selectState.appendChild(element);
             }
-            //this is how to find all the citys in az
-            fetch("./cities/AZ.json")
-                .then(function(resp){
-                    return resp.json();
-                })
-                .then(function(data){
-                    console.log(data);
-                });
-
         </script>
-    
     <p></p>
 
-    <label for="cities"; id="cities"; style="visibility: hidden;">Pick a city:</label>
-    <select id="city"; style="visibility: hidden;" onchange="showButton()">
-        <option value="temp">temp</option>
-        <option value="temp2">temp2</option>
-    </select>
+    <button onclick="getLatAndLong()"; id="button"; style="visibility: hidden;">Get Weather</button>
 
-    <p></p>
-
-    <button onclick="getWeather()"; id="button"; style="visibility: hidden;">Get Weather</button>
+       <p id="one"></p>
+       <p id="two"></p>
+       <p id="three"></p>
+       <p id="four"></p>
+       
     
 </body>
 </html>
